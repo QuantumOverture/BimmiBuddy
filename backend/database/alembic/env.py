@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+
 load_dotenv(override=True)
 import asyncio
 from logging.config import fileConfig
@@ -24,10 +25,14 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 from database import Base
+
 target_metadata = Base.metadata
 
 # Set connection string
-config.set_main_option("sqlalchemy.url",  f"postgresql+asyncpg://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}?ssl=require")
+config.set_main_option(
+    "sqlalchemy.url",
+    f"postgresql+asyncpg://{os.getenv('DB_USERNAME')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}?ssl=require",
+)
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")

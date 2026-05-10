@@ -1,11 +1,25 @@
-import { SnippetsOutlined } from "@ant-design/icons";
+import {
+  SnippetsOutlined,
+  HomeOutlined,
+  LoginOutlined,
+  UserAddOutlined
+} from "@ant-design/icons";
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
-import { Flex, Layout, Menu, theme, type MenuProps } from "antd";
+import {
+  Button,
+  Flex,
+  Layout,
+  Menu,
+  theme,
+  Tooltip,
+  type MenuProps,
+} from "antd";
 const { Header, Content, Sider } = Layout;
 import { Outlet } from "react-router";
 import { useLayoutStore } from "../store/layout.store";
 import { useShallow } from "zustand/react/shallow";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
+import React from "react";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -24,13 +38,23 @@ function getItem(
 }
 
 const keyToPageMap = {
-  "1": "/planner",
+  "1": "/",
+  "2": "/planner",
 };
 
-const items: MenuItem[] = [getItem("Planner", "1", <SnippetsOutlined />)];
+const pageToKeyMap = {
+  "/": "1",
+  "/planner": "2",
+};
+
+const items: MenuItem[] = [
+  getItem("Home", "1", <HomeOutlined />),
+  getItem("Planner", "2", <SnippetsOutlined />),
+];
 
 export default function CoreLayout() {
   let navigate = useNavigate();
+  const location = useLocation();
   const { currentTab, collapsedSidebar, toggleSidebar, updateCurrentTab } =
     useLayoutStore(
       useShallow((state) => ({
@@ -44,6 +68,10 @@ export default function CoreLayout() {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
+
+  React.useEffect(() => {
+    updateCurrentTab(pageToKeyMap[location.pathname]);
+  }, []);
 
   return (
     <>
@@ -70,27 +98,43 @@ export default function CoreLayout() {
         </Sider>
         <Layout>
           <Header style={{ padding: 0, background: colorBgContainer }}>
-            <Flex style={{"float":"right", "margin":"1em"}}>
+            <Flex style={{ float: "right", margin: "1em" }}>
               <Show when="signed-out">
-                <SignInButton />
-                <SignUpButton />
+                <SignInButton>
+                  <Tooltip title="Sign In">
+                    <Button
+                      style={{ margin: "0.25em" }}
+                      shape="circle"
+                      icon={<LoginOutlined />}
+                    ></Button>
+                  </Tooltip>
+                </SignInButton>
+                <SignUpButton>
+                  <Tooltip title="Sign Up">
+                    <Button
+                      style={{ margin: "0.25em" }}
+                      shape="circle"
+                      icon={<UserAddOutlined />}
+                    >
+                    </Button>
+                  </Tooltip>
+                </SignUpButton>
               </Show>
               <Show when="signed-in">
                 <UserButton />
               </Show>
             </Flex>
           </Header>
-          <Content style={{ margin: "0", width: "100%", height: "100%" }}>
-            <div
-              style={{
-                padding: 24,
-                minHeight: 360,
-                background: colorBgContainer,
-                borderRadius: borderRadiusLG,
-              }}
-            >
-              <Outlet />
-            </div>
+          <Content
+            style={{
+              margin: "0",
+              width: "100%",
+              height: "100%",
+              background: colorBgContainer,
+              borderRadius: borderRadiusLG,
+            }}
+          >
+            <Outlet />
           </Content>
         </Layout>
       </Layout>
